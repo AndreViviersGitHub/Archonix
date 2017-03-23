@@ -6,7 +6,7 @@ using System.Linq;
 public class HexMap : MonoBehaviour {
 
     public GameObject selectedUnit;
-    public GameObject selectedU;
+    //public GameObject selectedU;
 
     public HexType[] hexType;
 
@@ -19,20 +19,30 @@ public class HexMap : MonoBehaviour {
     int MapSizeY = 8;
 
     private void Start()
-    {
-        //setup selectedunit's variable
-        selectedUnit.GetComponent<EnemyUnit>().hexX = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x, 
-                                                                                selectedUnit.transform.position.y).x;
-        selectedUnit.GetComponent<EnemyUnit>().hexY = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x, 
-                                                                                selectedUnit.transform.position.y).y;
-        selectedUnit.GetComponent<EnemyUnit>().map = this;
-
+    {       
         GenerateMapArea();
         GeneratePathfindingGraph();
         GenerateMapVisualHexes();
       
     }
+    private void Update()
+    {
+        GameObject wMap = GameObject.FindGameObjectWithTag("Map");
+        if (wMap.GetComponent<HexMap>().selectedUnit == null)
+        {
+            Debug.Log("No Unit Selected!!!");
+        }
+        else
+        {
+            ////setup selectedunit's variable
+            selectedUnit.GetComponent<EnemyUnit>().hexX = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x,
+                                                                                selectedUnit.transform.position.y).x;
+            selectedUnit.GetComponent<EnemyUnit>().hexY = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x,
+                                                                                    selectedUnit.transform.position.y).y;
+            selectedUnit.GetComponent<EnemyUnit>().map = this;
+        }
 
+    }
     void GenerateMapArea()
     {
         //allocate map hexes
@@ -66,7 +76,7 @@ public class HexMap : MonoBehaviour {
         Hexes[7, 6] = 2;
     }
 
-    //ROBIN Pathfidning Graph
+
     void GeneratePathfindingGraph()
     {
         //initialize the array
@@ -130,74 +140,7 @@ public class HexMap : MonoBehaviour {
             }
         }
     }
-
-//QUIL Pathfinding Graph
-   /* void GeneratePathfindingGraph()
-    {
-        // Initialize the array
-        graph = new Node[MapSizeX, MapSizeX];
-
-        // Initialize a Node for each spot in the array
-        for (int x = 0; x < MapSizeX; x++)
-        {
-            for (int y = 0; y < MapSizeX; y++)
-            {
-                graph[x, y] = new Node();
-                graph[x, y].x = x;
-                graph[x, y].y = y;
-            }
-        }
-
-        // Now that all the nodes exist, calculate their neighbours
-        for (int x = 0; x < MapSizeX; x++)
-        {
-            for (int y = 0; y < MapSizeX; y++)
-            {
-
-                // This is the 4-way connection version:
-                /*				if(x > 0)
-                                    graph[x,y].neighbours.Add( graph[x-1, y] );
-                                if(x < mapSizeX-1)
-                                    graph[x,y].neighbours.Add( graph[x+1, y] );
-                                if(y > 0)
-                                    graph[x,y].neighbours.Add( graph[x, y-1] );
-                                if(y < mapSizeY-1)
-                                    graph[x,y].neighbours.Add( graph[x, y+1] );
-                */
-
-                // This is the 8-way connection version (allows diagonal movement)
-                // Try left
-              /*  if (x > 0)
-                {
-                    graph[x, y].neighbours.Add(graph[x - 1, y]);
-                    if (y > 0)
-                        graph[x, y].neighbours.Add(graph[x - 1, y - 1]);
-                    if (y < MapSizeY - 1)
-                        graph[x, y].neighbours.Add(graph[x - 1, y + 1]);
-                }
-
-                // Try Right
-                if (x < MapSizeX - 1)
-                {
-                    graph[x, y].neighbours.Add(graph[x + 1, y]);
-                    if (y > 0)
-                        graph[x, y].neighbours.Add(graph[x + 1, y - 1]);
-                    if (y < MapSizeY - 1)
-                        graph[x, y].neighbours.Add(graph[x + 1, y + 1]);
-                }
-
-                // Try straight up and down
-                if (y > 0)
-                    graph[x, y].neighbours.Add(graph[x, y - 1]);
-                if (y < MapSizeY - 1)
-                    graph[x, y].neighbours.Add(graph[x, y + 1]);
-
-                // This also works with 6-way hexes and n-way variable areas (like EU4)
-            }
-        }
-    }*/
-
-
+    
     void GenerateMapVisualHexes()
     {
         double r = 0, c = 0, z = 0;
@@ -247,96 +190,6 @@ public class HexMap : MonoBehaviour {
 
     }
 
- //ROBIN Generate Path To
-    /* public void GeneratePathTo(int X, int Y)
-     {
-         /*selectedUnit.GetComponent<Unit>().hexX = X;
-         selectedUnit.GetComponent<Unit>().hexY = Y;
-         selectedUnit.transform.position = HexCoordToWorldCoord(X, Y);
-
-             //clear any existing paths
-             selectedUnit.GetComponent<Unit>().currentPath = null;
-
-
-         Dictionary<Node, float> dist = new Dictionary<Node, float>();
-         Dictionary<Node, Node> prev = new Dictionary<Node, Node>();
-
-         // Setup the "Q" -- the list of nodes we haven't checked yet.
-         List<Node> notVisited = new List<Node>();
-
-         Node start = graph[
-                            selectedUnit.GetComponent<Unit>().hexX, 
-                            selectedUnit.GetComponent<Unit>().hexY
-                            ];
-
-         Node target = graph[
-                             X,
-                             Y
-                             ];
-
-         dist[start] = 0;
-         prev[start] = null;
-
-         foreach (Node v in graph)
-         {
-             if (v != start)
-             {
-                 dist[v] = Mathf.Infinity;
-                 prev[v] = null;
-             }
-             notVisited.Add(v);
-         }
-
-         while(notVisited.Count > 0)
-         {
-             //"u" smallest not yet visited node with the smallest distance
-             Node u = null;
-             foreach (Node possibleU in notVisited)
-             {
-                 if ((u == null) || (dist[possibleU] < dist[u]))
-                 { u = possibleU; }
-             }
-
-             if (u == target)
-             { break; } //Exit while loop
-
-             notVisited.Remove(u);
-
-             foreach (Node v in u.neighbours)
-             {
-                 float alt = dist[u] + u.DistanceTo(v);
-                 if (alt < dist[v])
-                 {
-                     dist[v] = alt;
-                     prev[v] = u;
-                 }
-             }
-
-             //shortest path found or no path found at this point
-             if (prev[target] == null)
-             {
-                 //no route between target and start
-                 return;
-             }
-
-             currentPath = new List<Node>();//List<Node> currentPath = new List<Node>(); //set as public to test length
-
-             Node curr = target;
-             //run through the previous chain and add it to the path
-             while(curr != null)
-             {
-                 currentPath.Add(curr);
-                 curr = prev[curr];
-             }
-
-             //currentPath is route from target to source so need to invert
-             currentPath.Reverse();
-
-             selectedUnit.GetComponent<Unit>().currentPath = currentPath;
-         }
-
-
-     } */
 
     float CostOfTile(int X, int Y)
     {
@@ -345,7 +198,7 @@ public class HexMap : MonoBehaviour {
     }
 
 
- //QUIL Generate Path To
+
     public void GeneratePathTo(int x, int y)
     {
         //selectedUnit.GetComponent<Unit>().hexX = x;
@@ -355,11 +208,7 @@ public class HexMap : MonoBehaviour {
         // Clear out our unit's old path.
         selectedUnit.GetComponent<EnemyUnit>().currentPath = null;
 
-        /*if (hexType[Hexes[x, y]] == 2)
-        {
-            // We probably clicked on a mountain or something, so just quit out.
-            return;
-        }*/
+
 
         Dictionary<Node, float> dist = new Dictionary<Node, float>();
         Dictionary<Node, Node> prev = new Dictionary<Node, Node>();
@@ -414,9 +263,7 @@ public class HexMap : MonoBehaviour {
 
             foreach (Node v in u.neighbours)
             {
-                //float alt = dist[u] + u.DistanceTo(v);
                 float alt = dist[u] + CostOfTile(v.x, v.y);
-                //float alt = dist[u] + CostToEnterTile(u.x, u.y, v.x, v.y);
                 if (alt < dist[v])
                 {
                     dist[v] = alt;

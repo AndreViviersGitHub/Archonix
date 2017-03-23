@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - EnemyUnit
+  - PlayerUnit
+  - Map
+  - Hex
   layers:
   - Default
   - TransparentFX
