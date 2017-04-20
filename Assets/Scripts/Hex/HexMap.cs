@@ -35,11 +35,11 @@ public class HexMap : MonoBehaviour {
         else
         {
             ////setup selectedunit's variable
-            selectedUnit.GetComponent<EnemyUnit>().hexX = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x,
+            selectedUnit.GetComponent<Unit>().hexX = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x,
                                                                                 selectedUnit.transform.position.y).x;
-            selectedUnit.GetComponent<EnemyUnit>().hexY = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x,
+            selectedUnit.GetComponent<Unit>().hexY = (int)WorldCoordToHexCoord(selectedUnit.transform.position.x,
                                                                                     selectedUnit.transform.position.y).y;
-            selectedUnit.GetComponent<EnemyUnit>().map = this;
+            selectedUnit.GetComponent<Unit>().map = this;
         }
 
     }
@@ -175,6 +175,8 @@ public class HexMap : MonoBehaviour {
                 
                 //Used to set the prefab on the map as well as able to get the object that was clicked on.
                 GameObject gObject = (GameObject)Instantiate(ht.VisualHexPrefab, new Vector3((float)r, (float)c, (float)z), Quaternion.identity);
+                gObject.name = "Hex_" + x + "_" + y;
+                gObject.transform.SetParent(this.transform);
                 ClickableHex clickhex = gObject.GetComponent<ClickableHex>();
 
                 clickhex.HexX = x;
@@ -191,9 +193,15 @@ public class HexMap : MonoBehaviour {
     }
 
 
-    float CostOfTile(int X, int Y)
+    float CostOfTile(int SourceX, int SourceY, int TargetX, int TargetY)
     {
-        HexType ht = hexType[Hexes[X, Y]];
+        HexType ht = hexType[Hexes[TargetX, TargetY]];
+        float cost = ht.movementCost;
+
+        if (SourceX != TargetX && SourceY != TargetY)
+        {
+            cost += 0.001f;
+        }
         return ht.movementCost;
     }
 
@@ -206,7 +214,7 @@ public class HexMap : MonoBehaviour {
         // selectedUnit.transform.position = HexCoordToWorldCoord(x, y);
 
         // Clear out our unit's old path.
-        selectedUnit.GetComponent<EnemyUnit>().currentPath = null;
+        selectedUnit.GetComponent<Unit>().currentPath = null;
 
 
 
@@ -217,8 +225,8 @@ public class HexMap : MonoBehaviour {
         List<Node> unvisited = new List<Node>();
 
         Node source = graph[
-                            selectedUnit.GetComponent<EnemyUnit>().hexX,
-                            selectedUnit.GetComponent<EnemyUnit>().hexY
+                            selectedUnit.GetComponent<Unit>().hexX,
+                            selectedUnit.GetComponent<Unit>().hexY
                             ];
 
         Node target = graph[x, y];
@@ -263,7 +271,7 @@ public class HexMap : MonoBehaviour {
 
             foreach (Node v in u.neighbours)
             {
-                float alt = dist[u] + CostOfTile(v.x, v.y);
+                float alt = dist[u] + CostOfTile(u.x, u.y, v.x, v.y);
                 if (alt < dist[v])
                 {
                     dist[v] = alt;
@@ -297,7 +305,7 @@ public class HexMap : MonoBehaviour {
 
         currentPath.Reverse();
 
-        selectedUnit.GetComponent<EnemyUnit>().currentPath = currentPath;
+        selectedUnit.GetComponent<Unit>().currentPath = currentPath;
     }
 
     public Vector3 HexCoordToWorldCoord(int X, int Y)

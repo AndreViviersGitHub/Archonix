@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4691357845910576}
-  - component: {fileID: 114289077995575732}
+  - component: {fileID: 114713063294748424}
   m_Layer: 0
   m_Name: FriendlyUnit
   m_TagString: PlayerUnit
@@ -110,7 +110,7 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1813750192037634}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &114289077995575732
+--- !u!114 &114713063294748424
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -118,7 +118,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1282699868800434}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5109bea87b6173842a6ed0a7603b0da9, type: 3}
+  m_Script: {fileID: 11500000, guid: 9d27a45727930844a8c0171ca0c28b78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   hexX: 0
