@@ -17,6 +17,8 @@ public class TurnBasedStateManager : MonoBehaviour {
 
     public TurnState currentState;
     public StateScripts ST;
+    private string setText;
+
     void Start()
     {
         currentState = TurnState.START;
@@ -32,25 +34,32 @@ public class TurnBasedStateManager : MonoBehaviour {
                 //setup battle scene
                 ST.SetSelectedUnits("User");
                 currentState = TurnState.USER_MOVE;
+                setText = "Start";
                 break;
             case (TurnState.USER_MOVE):                
-                ST.SetSelectedUnits("User");                
+                ST.SetSelectedUnits("User");
+                setText = "Player Move";
                 //player move  
                 break;
             case (TurnState.USER_ATTACK):
+                setText = "Player Attack!";
                 //player attack
                 break;
             case (TurnState.ENEMY_MOVE):
                 ST.SetSelectedUnits("Enemy");
+                setText = "Enemy Move";
                 //enemy move
                 break;
             case (TurnState.ENEMY_ATTACK):
+                setText = "Enemy Attack!";
                 //enemy attack
                 break;
             case (TurnState.WIN):
+                setText = "Win Condition";
                 //win conditions
                 break;
             case (TurnState.LOSE):
+                setText = "Lose Condition";
                 //lose conditions
                 break;
 
@@ -58,8 +67,11 @@ public class TurnBasedStateManager : MonoBehaviour {
     }
     void OnGUI()
     {
-        
         GUI.Box(new Rect(10, 10, 170, 160), "Menu");
+        GUI.Label(new Rect(20, 30, 170, 160),"State : " + setText);
+        GUI.Button(new Rect(20, 70, 150, 25), "Attack! ");
+
+
         if (GUI.Button(new Rect(20, 105, 150, 25), "Move Unit") && (currentState == TurnState.USER_MOVE || currentState == TurnState.ENEMY_MOVE))
         {
             ST.UnitMove();
