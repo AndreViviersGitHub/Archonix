@@ -6,7 +6,8 @@ public class Unit : MonoBehaviour {
 
     public int hexX; // uint x
     public int hexY; // unit y
-    public HexMap map;  // hexmap to get the map instantiated
+    public GameObject hexOccupied;
+    public HexMap map;  // hexmap to get the map ingame
     private bool moveBusy = false;  // boolean to check if unit is bussy moving
     public List<Node> currentPath = null;  //list of all nodes from start to end
     public float moveSpeed =2f; // How far a unit can move
@@ -18,57 +19,69 @@ public class Unit : MonoBehaviour {
     private bool done = false; // check if loop is done
     private bool done2 = false; // check if loop is done
     private int currNode = 0; //used for indexing 
+    private TurnBasedStateManager TS;
+
+    private GameObject targetedUnit;
+    //unit attributes
+    public int attackPower;
+    private int dameg;
+    public int totalHealth;
+    public int defense;
+    public string unitName;
+    public int playerNumber;
 
 
     private void Start()
     {
         clickedNode = new List<Vector3>(); // initialise the clickedNode
         gObjList = new List<GameObject>(); // initialise the gObjList
+        TS = Camera.main.GetComponent<TurnBasedStateManager>();
 
     }
  
     private void Update()
     {
-        if (currentPath != null)
-        {            
-            int currentPatLength = currentPath.Count - 1;
-            Vector3 endHexNode = map.HexCoordToWorldCoord(currentPath[currentPatLength].x, currentPath[currentPatLength].y) + new Vector3(0, 0, -1f); // gets end node
+        if (TS.getTurnState() == "USER_MOVE")
+        {
+            if (currentPath != null)
+            {
+                int currentPatLength = currentPath.Count - 1;
+                Vector3 endHexNode = map.HexCoordToWorldCoord(currentPath[currentPatLength].x, currentPath[currentPatLength].y) + new Vector3(0, 0, -1f); // gets end node
 
-            if (Input.GetMouseButtonUp(0))
-            {
-                clickedNode.Add(endHexNode);                
-            }
-            
-            if (clickedNode.Count == 1 && done == false) 
-            {
-                if (gObjList.Count > 2  )
-                {                    
-                    RemoveHexColor(); // remove the hexColors
-                    done = false;
+                if (Input.GetMouseButtonUp(0))
+                {
+                    clickedNode.Add(endHexNode);
                 }
-                CreateHexColorPath(currNode, true, false); // Colors the hexes in the path to the end      
+
+                if (clickedNode.Count == 1 && done == false)
+                {
+                    if (gObjList.Count > 2)
+                    {
+                        RemoveHexColor(); // remove the hexColors
+                        done = false;
+                    }
+                    CreateHexColorPath(currNode, true, false); // Colors the hexes in the path to the end      
+                }
+                currNode = 0;
+                if (clickedNode.Count == 2 && done2 == false)
+                {
+                    Debug.Log(gObjList.Count);
+                    RemoveHexColor(); // remove the hexColors    
+                    clickedNode = new List<Vector3>();
+                    CreateHexColorPath(currNode, false, true); // Colors the hexes in the path to the end               
+                    clickedNode = new List<Vector3>(); //reset clickedNode list
+                }
+
             }
-            currNode = 0;
-            if (clickedNode.Count == 2 && done2 == false)
-            {
-                Debug.Log(gObjList.Count);
-                RemoveHexColor(); // remove the hexColors    
-                clickedNode = new List<Vector3>();                           
-                CreateHexColorPath(currNode, false, true); // Colors the hexes in the path to the end               
-                clickedNode = new List<Vector3>(); //reset clickedNode list
-            }
-
-
-
-
         }
+        
     }
 
 
    //All Code for Coloring hexes on the movement path
     #region Pathfinding Color
 
-    #region remove hex color
+    #region remove hex material color 
     private void RemoveHexColor()
     {                    
             while (currNode < gObjList.Count)
@@ -81,7 +94,7 @@ public class Unit : MonoBehaviour {
     }
     #endregion
 
-    #region Find At 
+    #region Find At (gets the hex)
     /// <summary>
     /// Finds the hex at the co-ordinates given in HexPos
     /// </summary>
@@ -104,8 +117,7 @@ public class Unit : MonoBehaviour {
     }
     #endregion 
 
-
-    #region Color hex material
+    #region Change hex material color
     /// <summary>
     /// Change hex material color to blue from start to where the user clicked
     /// </summary>
@@ -135,14 +147,18 @@ public class Unit : MonoBehaviour {
         getHexInPath.GetComponent<Renderer>().material.color = new Color(0, 0, 255);
     }
     #endregion
+
+
     #endregion
 
     //All Code for movement / transition / movement ques
+
     #region Move next / move over time / move que/ transition
     // Move to next Hex Code
     #region Move To Next Hex
     public void MoveNextTile()
     {
+        
         if (actionsLeft <= 0)
         {
             return; // no actions left
@@ -239,17 +255,29 @@ public class Unit : MonoBehaviour {
     #endregion
  
     //All code for Action Reset and Action Check
+
     #region Action Reset and Action Check
+
+
     //Reset Actions so each unit has refreshed amount of actions at start of each new turn
-    #region Reset Actions Left
+
+    #region End Turn resets
     public void ResetActionsLeft()
     {
         Debug.Log("Actions Left: " + actionsLeft);
         actionsLeft = 1;
     }
 
+    public void ResetCurrentPath()
+    {
+        currentPath = null;
+    }
+
     #endregion
+
+
     //Check howmany actions the unit has left
+
     #region Check Actions
     public bool ActionsLeft()
     {

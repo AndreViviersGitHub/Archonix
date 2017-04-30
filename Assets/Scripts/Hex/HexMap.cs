@@ -23,7 +23,7 @@ public class HexMap : MonoBehaviour {
         GenerateMapArea();
         GeneratePathfindingGraph();
         GenerateMapVisualHexes();
-      
+        SetUnitsToHexes();
     }
     private void Update()
     {
@@ -74,6 +74,18 @@ public class HexMap : MonoBehaviour {
         Hexes[5, 6] = 2;
         Hexes[6, 5] = 2;
         Hexes[7, 6] = 2;
+       
+    }
+
+    void SetUnitsToHexes()
+    {
+        GameObject enemyUnit = GameObject.FindWithTag("EnemyUnit");
+        GameObject hex_10_4 = GameObject.Find("Hex_10_4");
+        hex_10_4.GetComponent<ClickableHex>().setSelectedUnit(enemyUnit);
+
+        GameObject playetUnit = GameObject.FindWithTag("PlayerUnit");
+        GameObject hex_0_4 = GameObject.Find("Hex_0_4");
+        hex_0_4.GetComponent<ClickableHex>().setSelectedUnit(playetUnit);
     }
 
 
@@ -177,6 +189,7 @@ public class HexMap : MonoBehaviour {
                 GameObject gObject = (GameObject)Instantiate(ht.VisualHexPrefab, new Vector3((float)r, (float)c, (float)z), Quaternion.identity);
                 gObject.name = "Hex_" + x + "_" + y;
                 gObject.transform.SetParent(this.transform);
+                gObject.GetComponent<ClickableHex>().clearSelectedUnit();
                 ClickableHex clickhex = gObject.GetComponent<ClickableHex>();
 
                 clickhex.HexX = x;
@@ -283,7 +296,7 @@ public class HexMap : MonoBehaviour {
         // If we get there, the either we found the shortest route
         // to our target, or there is no route at ALL to our target.
 
-        if (prev[target] == null)
+        if (prev[target] == null )
         {
             // No route between our target and the source
             return;

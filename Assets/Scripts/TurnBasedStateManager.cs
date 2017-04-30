@@ -72,7 +72,7 @@ public class TurnBasedStateManager : MonoBehaviour {
         GUI.Button(new Rect(20, 70, 150, 25), "Attack! ");
 
 
-        if (GUI.Button(new Rect(20, 105, 150, 25), "Move Unit") && (currentState == TurnState.USER_MOVE || currentState == TurnState.ENEMY_MOVE))
+        if (GUI.Button(new Rect(20, 105, 150, 25), "Move Unit") && (currentState == TurnState.USER_MOVE ))
         {
             ST.UnitMove();
             if (ST.ActionCheck() == false && currentState == TurnState.USER_MOVE) // check if the unit has turns left, if not go to enemy turn WILL ADD TOTAL TURN COUNT when more units are added
@@ -80,12 +80,15 @@ public class TurnBasedStateManager : MonoBehaviour {
                 Debug.Log(ST.ActionCheck());
                 currentState = TurnState.ENEMY_MOVE; // change to Enemy Turn
                 ST.ResetActionsLeft(); // reset the moves for the enemy
+                ST.ResetCurrentPath();
             }
             else
             {
                 Debug.Log(ST.ActionCheck());
                 currentState = TurnState.USER_MOVE; // change to User Turn
                 ST.ResetActionsLeft(); // reset the moves for the user
+                ST.ResetCurrentPath();
+
             }
             Debug.Log(ST.ActionCheck()); // check if sets correctly
         }
@@ -95,11 +98,14 @@ public class TurnBasedStateManager : MonoBehaviour {
             if (currentState == TurnState.START)
             {
                 currentState = TurnState.USER_MOVE;
-                ST.ResetActionsLeft();                
+                ST.ResetActionsLeft();
+                ST.ResetCurrentPath();               
             }
             else if (currentState == TurnState.USER_MOVE)
             {
                 currentState = TurnState.USER_ATTACK;
+                ST.ResetCurrentPath();
+
             }
             else if (currentState == TurnState.USER_ATTACK)
             {
@@ -113,20 +119,55 @@ public class TurnBasedStateManager : MonoBehaviour {
             else if (currentState == TurnState.ENEMY_ATTACK)
             {
                 currentState = TurnState.WIN;
+                ST.ResetCurrentPath();
+
             }
             else if (currentState == TurnState.WIN)
             {
                 currentState = TurnState.LOSE;
+                ST.ResetCurrentPath();
             }
             else if (currentState == TurnState.LOSE)
             {
                 currentState = TurnState.USER_MOVE;
+                ST.ResetCurrentPath();
             }
 
-        
 
-          
+
+
         }
+    }
+
+    public string getTurnState()
+    {
+        string state = "";
+        switch (currentState)
+        {
+            case (TurnState.START):
+                state = "START";
+                break;
+            case (TurnState.USER_MOVE):
+                state = "USER_MOVE";
+                break;
+            case (TurnState.USER_ATTACK):
+                state = "USER_ATTACK";
+                break;
+            case (TurnState.ENEMY_MOVE):
+                state = "ENEMY_MOVE";
+                break;
+            case (TurnState.ENEMY_ATTACK):
+                state = "ENEMY_ATTACK";
+                break;
+            case (TurnState.WIN):
+                state = "WIN";
+                break;
+            case (TurnState.LOSE):
+                state = "LOSE";
+                break;
+
+        }
+        return state;
     }
 
 
